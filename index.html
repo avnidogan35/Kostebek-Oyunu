@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Köstebek Vurmaca</title>
+    <style>
+        body { text-align: center; font-family: sans-serif; background: #3d2f1f; color: white; touch-action: manipulation; }
+        #game-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 400px; margin: 20px auto; }
+        .hole { width: 100px; height: 100px; background: #5c4033; border-radius: 50%; margin: auto; position: relative; overflow: hidden; border: 5px solid #2e1f14; }
+        .mole { width: 80px; height: 80px; background: #8B4513; border-radius: 50%; position: absolute; bottom: -80px; left: 10px; transition: bottom 0.2s; cursor: pointer; }
+        .mole.show { bottom: 10px; }
+        #ui { font-size: 20px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Köstebek Yakalama</h1>
+    <div id="ui">Puan: <span id="score">0</span> | Can: <span id="lives">5</span> | Rekor: <span id="highScore">0</span></div>
+    <div id="game-container">
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+    </div>
+    <script>
+        const moles = document.querySelectorAll('.mole');
+        const scoreDisplay = document.getElementById('score');
+        const livesDisplay = document.getElementById('lives');
+        const highScoreDisplay = document.getElementById('highScore');
+        let score = 0, lives = 5, highScore = localStorage.getItem('moleHighScore') || 0;
+        let activeMoleIndex = null, timer, spawnRate = 1500;
+
+        highScoreDisplay.textContent = highScore;
+
+        function randomHole() {
+            if (activeMoleIndex !== null) {
+                moles[activeMoleIndex].classList.remove('show');
+                lives--;
+                livesDisplay.textContent = lives;
+                if (lives <= 0) {
+                    alert('Oyun Bitti! Skorunuz: ' + score);
+                    if (score > highScore) { highScore = score; localStorage.setItem('moleHighScore', highScore); highScoreDisplay.textContent = highScore; }
+                    score = 0; lives = 5; scoreDisplay.textContent = score; livesDisplay.textContent = lives;
+                }
+            }
+            let nextHole;
+            do { nextHole = Math.floor(Math.random() * moles.length); } while (nextHole === activeMoleIndex);
+            activeMoleIndex = nextHole;
+            moles[activeMoleIndex].classList.add('show');
+        }
+
+        moles.forEach(mole => mole.addEventListener('click', () => {
+            if (mole.classList.contains('show')) {
+                score++;
+                scoreDisplay.textContent = score;
+                mole.classList.remove('show');
+                activeMoleIndex = null;
+            }
+        }));
+
+        setInterval(randomHole, spawnRate);
+    </script>
+</body>
+</html>
